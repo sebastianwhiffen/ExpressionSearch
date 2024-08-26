@@ -3,20 +3,34 @@ using System.Linq.Expressions;
 
 Person[] people =
 {
-    new Person { Name = "Alice", Age = 30, DateOfBirth = new DateTime(1993, 1, 1) },
-    new Person { Name = "Bob", Age = 25, DateOfBirth = new DateTime(1998, 1, 1) },
-    new Person { Name = "Charlie", Age = 35, DateOfBirth = new DateTime(1988, 1, 1) },
-    new Person { Name = "David", Age = 40, DateOfBirth = new DateTime(1983, 1, 1) },
-    new Person { Name = "Eve", Age = 28, DateOfBirth = new DateTime(1995, 1, 1) }
+    new Person { fName = "John", lName = "smith" },
+    new Person { fName = "Jane", lName = "Doe" },
+    new Person { fName = "John", lName = "Doe" },
 };
 
-while (true)
-{
-    Console.WriteLine("Enter an expression where x is the predicate. eg: x.Age > 30");
-    var expression = Console.ReadLine();
+var builder = WebApplication.CreateBuilder(args); 
 
-    people.Where(ParseExpression(expression!)).ToList().ForEach(person => Console.WriteLine($"{person.Name}, {person.Age}, {person.DateOfBirth.ToShortDateString()}"));
-}
+builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+    {
+        builder.WithOrigins("*")
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    }));
+
+builder.WebHost.UseUrls("http://localhost:5001");
+
+var app = builder.Build();
+
+app.UseCors("MyPolicy");
+
+app.MapGet("/", (string? expression) => 
+{
+    if(expression == null) return people;
+
+    return people.Where(ParseExpression(expression!));
+});
+
+app.Run();
 
 static Func<Person, bool> ParseExpression(string expressionString)
 {
@@ -37,7 +51,6 @@ static Func<Person, bool> ParseExpression(string expressionString)
 
 class Person
 {
-    public string Name { get; set; }
-    public int Age { get; set; }
-    public DateTime DateOfBirth { get; set; }
+    public string fName { get; set; }
+    public string lName { get; set; }
 }
