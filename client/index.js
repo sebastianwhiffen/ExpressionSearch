@@ -23,6 +23,9 @@ const fillTable = async (people) => {
         const lastNameCell = document.createElement("td");
         lastNameCell.textContent = p.lName;
         row.appendChild(lastNameCell);
+        const dobCell = document.createElement("td");
+        dobCell.textContent = p.dob.toString();
+        row.appendChild(dobCell);
         table.appendChild(row);
     });
 };
